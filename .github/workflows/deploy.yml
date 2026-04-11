@@ -1,12 +1,8 @@
-name: Build → ACR → AKS
+name: Build to ACR to AKS
 
 on:
   push:
     branches: [ main ]
-
-env:
-  ACR_LOGIN_SERVER: ${{ secrets.ACR_LOGIN_SERVER }}
-  IMAGE_NAME: myngnix
 
 jobs:
   build-and-deploy:
@@ -31,9 +27,8 @@ jobs:
     - name: Build and Push Docker image
       run: |
         IMAGE_TAG=${{ github.sha }}
-        docker build -t $ACR_LOGIN_SERVER/$IMAGE_NAME:$IMAGE_TAG .
-        docker push $ACR_LOGIN_SERVER/$IMAGE_NAME:$IMAGE_TAG
-        echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
+        docker build -t ${{ secrets.ACR_LOGIN_SERVER }}/myngnix:$IMAGE_TAG .
+        docker push ${{ secrets.ACR_LOGIN_SERVER }}/myngnix:$IMAGE_TAG
 
     - name: Set AKS context
       uses: azure/aks-set-context@v3
@@ -43,54 +38,5 @@ jobs:
 
     - name: Deploy to AKS
       run: |
-        kubectl set image deployment/webapp webapp=$ACR_LOGIN_SERVER/$IMAGE_NAME:$IMAGE_TAG
-        kubectl rollout status deployment/webapp
-EOFmkdir -p ~/AzureProject/.github/workflows
-cat > ~/AzureProject/.github/workflows/deploy.yml << 'EOF'
-name: Build → ACR → AKS
-
-on:
-  push:
-    branches: [ main ]
-
-env:
-  ACR_LOGIN_SERVER: ${{ secrets.ACR_LOGIN_SERVER }}
-  IMAGE_NAME: myngnix
-
-jobs:
-  build-and-deploy:
-    runs-on: ubuntu-latest
-
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-
-    - name: Azure Login
-      uses: azure/login@v1
-      with:
-        creds: ${{ secrets.AZURE_CREDENTIALS }}
-
-    - name: Login to ACR
-      uses: docker/login-action@v3
-      with:
-        registry: ${{ secrets.ACR_LOGIN_SERVER }}
-        username: ${{ secrets.ACR_USERNAME }}
-        password: ${{ secrets.ACR_PASSWORD }}
-
-    - name: Build and Push Docker image
-      run: |
-        IMAGE_TAG=${{ github.sha }}
-        docker build -t $ACR_LOGIN_SERVER/$IMAGE_NAME:$IMAGE_TAG .
-        docker push $ACR_LOGIN_SERVER/$IMAGE_NAME:$IMAGE_TAG
-        echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
-
-    - name: Set AKS context
-      uses: azure/aks-set-context@v3
-      with:
-        resource-group: AzureProject
-        cluster-name: aks-firstazure
-
-    - name: Deploy to AKS
-      run: |
-        kubectl set image deployment/webapp webapp=$ACR_LOGIN_SERVER/$IMAGE_NAME:$IMAGE_TAG
+        kubectl set image deployment/webapp webapp=${{ secrets.ACR_LOGIN_SERVER }}/myngnix:${{ github.sha }}
         kubectl rollout status deployment/webapp
