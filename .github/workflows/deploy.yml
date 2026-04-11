@@ -38,5 +38,5 @@ jobs:
 
     - name: Deploy to AKS
       run: |
-        kubectl set image deployment/webapp webapp=${{ secrets.ACR_LOGIN_SERVER }}/myngnix:${{ github.sha }}
+        kubectl set image deployment/webapp myngnix=${{ secrets.ACR_LOGIN_SERVER }}/myngnix:${{ github.sha }}
         kubectl rollout status deployment/webapp
