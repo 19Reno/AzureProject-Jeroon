@@ -1,4 +1,4 @@
-name: Build to ACR to AKS
+name: Build → ACR → AKS
 
 on:
   push:
@@ -7,6 +7,9 @@ on:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
 
     steps:
     - name: Checkout code
@@ -15,7 +18,9 @@ jobs:
     - name: Azure Login
       uses: azure/login@v1
       with:
-        creds: ${{ secrets.AZURE_CREDENTIALS }}
+        client-id: ${{ secrets.AZURE_CLIENT_ID }}
+        tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+        subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
     - name: Login to ACR
       uses: docker/login-action@v3
@@ -30,13 +35,6 @@ jobs:
         docker build -t ${{ secrets.ACR_LOGIN_SERVER }}/myngnix:$IMAGE_TAG .
         docker push ${{ secrets.ACR_LOGIN_SERVER }}/myngnix:$IMAGE_TAG
 
-    - name: Set AKS context
-      uses: azure/aks-set-context@v3
-      with:
-        resource-group: AzureProject
-        cluster-name: aks-firstazure
-
-    - name: Deploy to AKS
-      run: |
-        kubectl set image deployment/webapp myngnix=${{ secrets.ACR_LOGIN_SERVER }}/myngnix:${{ github.sha }}
-        kubectl rollout status deployment/webapp
+    # AKS deleted — skipping deploy steps
+    # - name: Set AKS context
+    # - name: Deploy to AKS
