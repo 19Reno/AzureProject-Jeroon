@@ -1,0 +1,33 @@
+frontend:
+  replicaCount: 1
+  image:
+    repository: acrjeroon.azurecr.io/shopflow-frontend
+    tag: latest
+    pullPolicy: Always
+  service:
+    type: ClusterIP
+    port: 80
+  resources:
+    requests:
+      cpu: "100m"
+      memory: "128Mi"
+    limits:
+      cpu: "200m"
+      memory: "256Mi"
+
+backend:
+  replicaCount: 1
+  image:
+    repository: acrjeroon.azurecr.io/shopflow-backend
+    tag: latest
+    pullPolicy: Always
+  service:
+    type: ClusterIP
+    port: 3000
+  resources:
+    requests:
+      cpu: "100m"
+      memory: "128Mi"
+    limits:
+      cpu: "300m"
+      memory: "256Mi"

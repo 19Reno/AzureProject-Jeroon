@@ -1,0 +1,8 @@
+resource_group   = "AzureProject"
+location         = "southafricanorth"
+acr_name         = "acrjeroon"
+aks_cluster_name = "aks-shopflow"
+vnet_name        = "vnet-shopflow"
+kv_name          = "kv-shopflow-jeroon"
+db_name          = "psql-shopflow-jeroon"
+db_password      = "ShopFlow@2024!"
