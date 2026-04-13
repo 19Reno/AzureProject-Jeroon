@@ -60,11 +60,18 @@ jobs:
         tenant-id: ${{ secrets.AZURE_TENANT_ID }}
         subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-    - name: Start AKS
+    - name: Start AKS if stopped
       run: |
-        az aks start \
+        STATUS=$(az aks show \
           --resource-group AzureProject \
-          --name aks-shopflow
+          --name aks-shopflow \
+          --query "powerState.code" -o tsv)
+        echo "AKS status: $STATUS"
+        if [ "$STATUS" = "Stopped" ]; then
+          az aks start --resource-group AzureProject --name aks-shopflow
+        else
+          echo "AKS already running, skipping start."
+        fi
 
     - name: Get AKS credentials
       run: |
