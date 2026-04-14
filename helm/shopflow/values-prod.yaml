@@ -1,0 +1,53 @@
+global:
+  environment: production
+  registry: acrjeroon.azurecr.io
+
+frontend:
+  replicaCount: 1
+  image:
+    repository: acrjeroon.azurecr.io/shopflow-frontend
+    tag: latest
+    pullPolicy: Always
+  resources:
+    requests:
+      cpu: "100m"
+      memory: "128Mi"
+    limits:
+      cpu: "200m"
+      memory: "256Mi"
+  service:
+    type: ClusterIP
+    port: 80
+
+backend:
+  replicaCount: 1
+  image:
+    repository: acrjeroon.azurecr.io/shopflow-backend
+    tag: latest
+    pullPolicy: Always
+  resources:
+    requests:
+      cpu: "200m"
+      memory: "256Mi"
+    limits:
+      cpu: "500m"
+      memory: "512Mi"
+  env:
+    NODE_ENV: production
+    DB_HOST: psql-shopflow-jeroon.postgres.database.azure.com
+    DB_NAME: shopflowdb
+    DB_USER: shopflowadmin
+  envFromSecret:
+    - secretName: shopflow-db-secret
+      key: DB_PASSWORD
+
+hpa:
+  enabled: true
+  backend:
+    minReplicas: 1
+    maxReplicas: 3
+    targetCPUUtilizationPercentage: 70
+
+podDisruptionBudget:
+  enabled: true
+  minAvailable: 1
